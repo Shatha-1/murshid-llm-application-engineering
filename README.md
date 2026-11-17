@@ -8,9 +8,10 @@ A small, fictional service assistant built step by step over four days in the **
 
 | Notebook | What it is | Open |
 |---|---|---|
-| [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) | Core project, cumulative through Day 2 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/notebooks/murshid.ipynb) |
+| [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) | Core project, cumulative through Day 3 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/notebooks/murshid.ipynb) |
 | [`homework/day1_real_model.ipynb`](homework/day1_real_model.ipynb) | Day 1 homework — real model (FLAN-T5 small) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day1_real_model.ipynb) |
 | [`homework/day2_tools.ipynb`](homework/day2_tools.ipynb) | Day 2 homework — validate and dispatch tool calls | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day2_tools.ipynb) |
+| [`homework/day3_errors.ipynb`](homework/day3_errors.ipynb) | Day 3 homework — intentional errors and corrected input | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day3_errors.ipynb) |
 
 ## Four-day development journey
 
@@ -18,10 +19,18 @@ A small, fictional service assistant built step by step over four days in the **
 |---|---|---:|---|
 | 1 · Foundations | Synthetic directory, `FakeClient`, `ask`, response contract | 1–3 | Three known answers; blank input adds no mock call |
 | 2 · Structure and tools | Validated ticket, read-only `check_status`, ownership check | 4–6 | Five scenarios; no unauthorized disclosure or mutation |
-| 3 · Guard and test | Versioned prompt, input guards, pipeline, ten golden cases | 7–10 | Upcoming |
+| 3 · Guard and test | Versioned prompt, input guards, pipeline, ten golden cases | 7–10 | **10/10** golden cases pass |
 | 4 · Measure and finish | Public exact cache, metrics, regression, export | 11–14 | Upcoming |
 
 Each day is a separate commit on the same notebook path, so the history shows the project growing.
+
+## Pipeline
+
+```
+input → input guard → ticket extraction → schema / business-rule validation
+      → public mock answer  OR  read-only status tool (ownership check)
+      → output validation → response + minimal metrics
+```
 
 ## What it does — and does not do
 
@@ -30,6 +39,8 @@ Each day is a separate commit on the same notebook path, so the history shows th
 | Answer two public FAQs (Arabic and English) | Call any real model or API |
 | Return application status only to the owning session | Implement real authentication |
 | Validate a structured ticket (keys, types, enums) | Perform general NLP — extraction is rule-based |
+| Block example injection strings, long input and ID-like numbers | Provide comprehensive security or privacy detection |
+| Run 10 fixed behavioral test cases | Measure real LLM quality |
 
 ## Dataset
 
@@ -69,6 +80,10 @@ Blank input is rejected before the client is called, so it adds no mock call. Re
 | Status of `REF-9999` | `not_found` |
 | Request to change an application | `unsupported_action` — the demo is read-only |
 
+### Day 3 — Guard and test
+
+[`results/core/day3_results.json`](results/core/day3_results.json) — **10 / 10** golden cases pass: `ok` ×2, `under_review`, `not_found`, `needs_clarification`, `out_of_scope`, `access_denied`, `blocked_instruction`, `invalid_input`, `invalid_schema`. A correct refusal counts as a pass when the request should be rejected.
+
 ## Homework
 
 ### Day 1 — a real model
@@ -92,6 +107,10 @@ Blank input is rejected before the client is called, so it adds no mock call. Re
 
 [`results/day2/tools_result.json`](results/day2/tools_result.json) — **7 / 7** cases pass and records stay unchanged. The dispatcher accepts only `check_status`, validates the call shape and arguments, and checks ownership: own record → `ok`; another user's or a missing record → `unavailable` (same answer, so existence is not leaked); other tools → `tool_not_allowed`; bad arguments → `invalid_arguments`; malformed call → `invalid_call`.
 
+### Day 3 — expected errors
+
+[`results/day3/errors_result.json`](results/day3/errors_result.json) — `None`, blank text and a 501-character question are each rejected with a caught `ValueError`, and a corrected question is accepted. A caught rejection is a successful test here: the validator did its job.
+
 ## How to run
 
 Core project: no installation, API key, GPU or download needed — Python 3.9+ standard library only. Click **Open in Colab** above, choose a CPU runtime, and run all cells from the top. Outputs are written to `murshid_outputs/`.
@@ -101,7 +120,9 @@ Real-model homework (Days 1 and 4) downloads `google/flan-t5-small` from Hugging
 ## Limitations
 
 - No live language model in the core project; routing is finite and rule-based.
+- Guards are educational examples, not a security control.
 - No real authentication — ownership comes from a fixture.
+- 10/10 on fixed cases is not a general reliability guarantee.
 - A small English real-model example is not evidence of Arabic service quality.
 
 ## Attribution
