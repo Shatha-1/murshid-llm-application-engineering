@@ -8,10 +8,11 @@ A small, fictional service assistant built step by step over four days in the **
 
 | Notebook | What it is | Open |
 |---|---|---|
-| [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) | Core project, cumulative through Day 3 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/notebooks/murshid.ipynb) |
+| [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) | Core project, cumulative through Day 4 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/notebooks/murshid.ipynb) |
 | [`homework/day1_real_model.ipynb`](homework/day1_real_model.ipynb) | Day 1 homework — real model (FLAN-T5 small) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day1_real_model.ipynb) |
 | [`homework/day2_tools.ipynb`](homework/day2_tools.ipynb) | Day 2 homework — validate and dispatch tool calls | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day2_tools.ipynb) |
 | [`homework/day3_errors.ipynb`](homework/day3_errors.ipynb) | Day 3 homework — intentional errors and corrected input | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day3_errors.ipynb) |
+| [`homework/day4_evaluation.ipynb`](homework/day4_evaluation.ipynb) | Day 4 homework — evaluate three real-model answers | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day4_evaluation.ipynb) |
 
 ## Four-day development journey
 
@@ -20,7 +21,7 @@ A small, fictional service assistant built step by step over four days in the **
 | 1 · Foundations | Synthetic directory, `FakeClient`, `ask`, response contract | 1–3 | Three known answers; blank input adds no mock call |
 | 2 · Structure and tools | Validated ticket, read-only `check_status`, ownership check | 4–6 | Five scenarios; no unauthorized disclosure or mutation |
 | 3 · Guard and test | Versioned prompt, input guards, pipeline, ten golden cases | 7–10 | **10/10** golden cases pass |
-| 4 · Measure and finish | Public exact cache, metrics, regression, export | 11–14 | Upcoming |
+| 4 · Measure and finish | Public exact cache, metrics, regression, export | 11–14 | Mock calls **3 → 1**; cache hit rate **66.7%** |
 
 Each day is a separate commit on the same notebook path, so the history shows the project growing.
 
@@ -32,6 +33,8 @@ input → input guard → ticket extraction → schema / business-rule validatio
       → output validation → response + minimal metrics
 ```
 
+Day 4 wraps only the two public FAQs in an exact cache keyed by `(question, language, model, prompt_version, directory_version)` with a 300-second TTL. Status requests, malformed tickets and guarded requests bypass the cache. Details: [docs/project-notes.md](docs/project-notes.md).
+
 ## What it does — and does not do
 
 | Does | Does not |
@@ -41,6 +44,7 @@ input → input guard → ticket extraction → schema / business-rule validatio
 | Validate a structured ticket (keys, types, enums) | Perform general NLP — extraction is rule-based |
 | Block example injection strings, long input and ID-like numbers | Provide comprehensive security or privacy detection |
 | Run 10 fixed behavioral test cases | Measure real LLM quality |
+| Cache the two public FAQs with versioned keys and a TTL | Claim real speedups or cost savings |
 
 ## Dataset
 
@@ -84,6 +88,19 @@ Blank input is rejected before the client is called, so it adds no mock call. Re
 
 [`results/core/day3_results.json`](results/core/day3_results.json) — **10 / 10** golden cases pass: `ok` ×2, `under_review`, `not_found`, `needs_clarification`, `out_of_scope`, `access_denied`, `blocked_instruction`, `invalid_input`, `invalid_schema`. A correct refusal counts as a pass when the request should be rejected.
 
+### Day 4 — Measure and finish
+
+[`results/core/day4_results.json`](results/core/day4_results.json) · [`results/core/final_report.json`](results/core/final_report.json)
+
+| Check | Result |
+|---|---|
+| Mock calls for 3 identical FAQs — without / with cache | 3 / 1 |
+| Cache hit sequence | miss, hit, hit (66.7%) |
+| Regression after caching | 10 / 10 still pass |
+| Actual external API calls | 0 |
+
+Trace IDs and latency change between runs; status codes, counters and pass/fail results are deterministic. The token-cost figure in the final report uses invented prices and is illustrative only.
+
 ## Homework
 
 ### Day 1 — a real model
@@ -110,6 +127,10 @@ Blank input is rejected before the client is called, so it adds no mock call. Re
 ### Day 3 — expected errors
 
 [`results/day3/errors_result.json`](results/day3/errors_result.json) — `None`, blank text and a 501-character question are each rejected with a caught `ValueError`, and a corrected question is accepted. A caught rejection is a successful test here: the validator did its job.
+
+### Day 4 — evaluate three real-model answers
+
+Open [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day4_evaluation.ipynb), run all cells on a CPU runtime, then save back to this repository (File → Save a copy in GitHub). The run generates answers to three paraphrased questions and records tokens, time and a `reference`+`number` keyword indicator — a weak proxy, not semantic accuracy, so each answer is also reviewed by hand.
 
 ## How to run
 
