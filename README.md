@@ -1,39 +1,50 @@
 # Murshid Mini — LLM Application Engineering
 
-A small, fictional service assistant built step by step over four days in the **LLM Application Engineering (SDA-AIE-213)** program. This repository holds one cumulative notebook that grows each day.
+A small, fictional service assistant built step by step over four days in the **LLM Application Engineering (SDA-AIE-213)** program. It answers known public service questions, looks up application status through an authorized read-only tool, rejects unsuitable inputs, tests its own behavior against fixed cases, and caches public answers safely.
 
-> **Mode: `mock`.** `FakeClient` is a finite, deterministic simulator — **not a live language model**. The project focuses on the engineering around an LLM-shaped interface. All data is synthetic.
+> **Mode: `mock`.** `FakeClient` is a finite, deterministic simulator — **not a live language model**. The core project demonstrates the engineering around an LLM-shaped interface (validation, tools, authorization, guards, testing, caching, measurement). All data is synthetic.
 
-## Progress
+## Notebooks
 
-| Day | Focus | Notebook cells | Status |
+| Notebook | What it is | Open |
+|---|---|---|
+| [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) | Core project, cumulative through Day 1 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/notebooks/murshid.ipynb) |
+| [`homework/day1_real_model.ipynb`](homework/day1_real_model.ipynb) | Day 1 homework — real model (FLAN-T5 small) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day1_real_model.ipynb) |
+
+## Four-day development journey
+
+| Day | Built | Notebook cells | Result |
 |---|---|---:|---|
-| 1 · Foundations | Synthetic directory, `FakeClient`, `ask`, response contract | 1–3 | ✅ Done |
-| 2 · Structure and tools | Validated ticket, read-only status lookup, ownership check | 4–6 | Upcoming |
-| 3 · Guard and test | Versioned prompt, input guards, pipeline, golden cases | 7–10 | Upcoming |
-| 4 · Measure and finish | Public cache, metrics, regression, export | 11–14 | Upcoming |
+| 1 · Foundations | Synthetic directory, `FakeClient`, `ask`, response contract | 1–3 | Three known answers; blank input adds no mock call |
+| 2 · Structure and tools | Validated ticket, read-only `check_status`, ownership check | 4–6 | Upcoming |
+| 3 · Guard and test | Versioned prompt, input guards, pipeline, ten golden cases | 7–10 | Upcoming |
+| 4 · Measure and finish | Public exact cache, metrics, regression, export | 11–14 | Upcoming |
 
-## Day 1 — Foundations
+Each day is a separate commit on the same notebook path, so the history shows the project growing.
 
-**What was built**
+## What it does — and does not do
 
-- **Synthetic service directory** — two public answers (Arabic and English) plus a clarification fallback.
-- **`FakeClient`** — a deterministic lookup that returns a known answer and counts mock calls. It never calls an API.
-- **`ask(question)`** — wraps the client and returns a fixed response contract.
-- **Blank-input check** — empty or whitespace-only input is rejected before the client is called, so it adds no mock call.
+| Does | Does not |
+|---|---|
+| Answer two public FAQs (Arabic and English) | Call any real model or API |
 
-**Response contract**
+## Dataset
 
-```json
-{
-  "trace_id": "uuid4 string",
-  "answer": "text",
-  "model": "training-mock",
-  "latency_ms": 0.01
-}
-```
+Hand-written synthetic teaching fixtures embedded in the code. No real records or personal data.
 
-**Results** — [`results/core/baseline_results.json`](results/core/baseline_results.json)
+| Reference | Owner | Status | Purpose |
+|---|---|---|---|
+| `REF-1001` | `demo-user-1` | `under_review` | Owner can see status |
+| `REF-1002` | `demo-user-2` | `approved` | Access-denied test for `demo-user-1` |
+| `REF-9999` | — | absent | Not-found test |
+
+The session fixture is `demo-user-1`. Knowing a reference number does not prove ownership.
+
+## Results by day
+
+### Day 1 — Foundations
+
+[`results/core/baseline_results.json`](results/core/baseline_results.json)
 
 | Input | Answer |
 |---|---|
@@ -41,18 +52,37 @@ A small, fictional service assistant built step by step over four days in the **
 | `How can I check my application status?` | You can check your application status using its reference number. |
 | Vague request `ساعدني` | ما الخدمة التي تحتاج مساعدة بشأنها؟ (clarification) |
 
-Blank input adds no mock call. `trace_id` and `latency_ms` change on every run; the answers and the model label are deterministic. Latency measures local Python execution, not model inference.
+Blank input is rejected before the client is called, so it adds no mock call. Response contract: `trace_id`, `answer`, `model`, `latency_ms`.
+
+## Homework
+
+### Day 1 — a real model
+
+[`results/day1/live_demo_result.json`](results/day1/live_demo_result.json) — `google/flan-t5-small` run locally on a Colab CPU (no API key, no hosted inference).
+
+| Field | Value |
+|---|---|
+| Question | How can I check my application status? |
+| Generated answer | Use its reference number |
+| Input / output tokens | 34 / 6 |
+| Inference time | 0.294 s (CPU) |
+
+**Review:** the answer tells the user to use the reference number and invents no fees, dates or status.
+
+**Input → tokens → model → answer:** the prompt (context + question) is split into 34 input tokens, and FLAN-T5 small generates the answer one token at a time (6 output tokens) from its learned weights, so the wording can vary and must be reviewed. `FakeClient`, by contrast, returns a hand-written answer from a fixed mapping without generating anything.
+
+**Setup note:** the pinned `transformers==4.49.0` / `sentencepiece==0.2.0` failed to install on Colab's Python 3.13, so the setup cell uses Colab's preinstalled `torch` 2.14.1 and `transformers` 5.22.1 instead.
 
 ## How to run
 
-No installation, API key, GPU or download needed — Python 3.9+ standard library only.
+Core project: no installation, API key, GPU or download needed — Python 3.9+ standard library only. Click **Open in Colab** above, choose a CPU runtime, and run all cells from the top. Outputs are written to `murshid_outputs/`.
 
-Open [`notebooks/murshid.ipynb`](notebooks/murshid.ipynb) in Google Colab (File → Open notebook → GitHub), select a CPU runtime, and run all cells from the top. Outputs are written to `murshid_outputs/`.
+Real-model homework (Days 1 and 4) downloads `google/flan-t5-small` from Hugging Face on first run; allow a few minutes.
 
 ## Limitations
 
-- No live language model; answers come from a hand-written mapping.
-- Only a few known questions are supported at this stage.
+- No live language model in the core project; routing is finite and rule-based.
+- A small English real-model example is not evidence of Arabic service quality.
 
 ## Attribution
 
