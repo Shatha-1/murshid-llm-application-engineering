@@ -170,7 +170,7 @@ Trace IDs and latency change between runs; status codes, counters and pass/fail 
 | Question | How can I check my application status? |
 | Generated answer | Use its reference number |
 | Input / output tokens | 34 / 6 |
-| Inference time | 0.501 s (CPU; varies between runs) |
+| Inference time | 0.223 s (CPU; varies between runs) |
 
 **Review:** the answer tells the user to use the reference number and invents no fees, dates or status.
 
