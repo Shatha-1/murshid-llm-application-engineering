@@ -49,9 +49,9 @@ murshid-llm-application-engineering/
 │   │   ├── day2_results.json       Day 2 — five status scenarios: ticket, tool result and code
 │   │   ├── day3_results.json       Day 3 — ten golden cases with pass/fail and reasons
 │   │   ├── day4_results.json       Day 4 — cache experiment: mock calls without/with cache, hit sequence
-│   │   ├── metrics.json            Day 4 — per-request metrics (code, cache_hit, mock/tool calls, latency); no questions, references or answers
+│   │   ├── metrics.json            Day 4 — the measured time (latency_ms) per request, plus code, cache_hit, mock/tool calls; no questions or answers
 │   │   ├── synthetic_data.json     The synthetic directory and status records used by the project
-│   │   └── final_report.json       Final summary: golden tests, cache experiment, illustrative cost, limits
+│   │   └── final_report.json       Final report: mode, data (dataset), tests (golden_tests), cache, cost (hypothetical) and limits
 │   ├── day1/live_demo_result.json  Day 1 homework — real-model answer, tokens, inference time
 │   ├── day2/tools_result.json      Day 2 homework — 7 tool-call cases and records_unchanged
 │   ├── day3/errors_result.json     Day 3 homework — 3 caught errors and the accepted corrected input
