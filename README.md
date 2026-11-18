@@ -14,6 +14,64 @@ A small, fictional service assistant built step by step over four days in the **
 | [`homework/day3_errors.ipynb`](homework/day3_errors.ipynb) | Day 3 homework — intentional errors and corrected input | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day3_errors.ipynb) |
 | [`homework/day4_evaluation.ipynb`](homework/day4_evaluation.ipynb) | Day 4 homework — evaluate three real-model answers | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day4_evaluation.ipynb) |
 
+## Repository structure
+
+```text
+murshid-llm-application-engineering/
+├── README.md                       Project overview, results, structure and how to run (this file)
+├── requirements.txt                Core project needs no packages — Python 3.9+ standard library only
+├── .gitignore                      Keeps caches, Colab output folders, ZIPs and model weights out of Git
+│
+├── notebooks/
+│   └── murshid.ipynb               Core project — one cumulative notebook, Days 1–4 (14 code cells, all outputs saved)
+│
+├── homework/                       One separate notebook per day, never mixed into the core project
+│   ├── day1_real_model.ipynb       Runs google/flan-t5-small on CPU and reports answer, tokens and time
+│   ├── day2_tools.ipynb            Validates and dispatches structured tool calls (only check_status allowed)
+│   ├── day3_errors.ipynb           Triggers expected input errors and shows the corrected input
+│   └── day4_evaluation.ipynb       Generates answers to three paraphrased questions and evaluates them
+│
+├── results/                        JSON outputs saved from the runs
+│   ├── core/                       Written by notebooks/murshid.ipynb
+│   │   ├── baseline_results.json   Day 1 — three answers from ask() with trace_id, model and latency
+│   │   ├── day2_results.json       Day 2 — five status scenarios: ticket, tool result and code
+│   │   ├── day3_results.json       Day 3 — ten golden cases with pass/fail and reasons
+│   │   ├── day4_results.json       Day 4 — cache experiment: mock calls without/with cache, hit sequence
+│   │   ├── metrics.json            Day 4 — per-request metrics (code, cache_hit, mock/tool calls, latency); no questions, references or answers
+│   │   ├── synthetic_data.json     The synthetic directory and status records used by the project
+│   │   └── final_report.json       Final summary: golden tests, cache experiment, illustrative cost, limits
+│   ├── day1/live_demo_result.json  Day 1 homework — real-model answer, tokens, inference time
+│   ├── day2/tools_result.json      Day 2 homework — 7 tool-call cases and records_unchanged
+│   ├── day3/errors_result.json     Day 3 homework — 3 caught errors and the accepted corrected input
+│   └── day4/evaluation_result.json Day 4 homework — 3 generated answers, keyword hits, tokens and time
+│
+└── docs/
+    └── project-notes.md            Technical notes: pipeline, components by day, data fixture, cache rules, tests, limits
+```
+
+### Inside the core notebook
+
+Each code cell starts with a `# DAY N - Cell X:` label; the first cell of the file is the Open in Colab badge.
+
+| Cell | Day | What it does |
+|---:|---|---|
+| 1 | 1 | Synthetic service directory, `save_json` helper and `FakeClient` (finite lookup, counts mock calls) |
+| 2 | 1 | `ask()` — the baseline app and its response contract |
+| 3 | 1 | Runs three questions, checks blank input adds no mock call, saves `baseline_results.json` |
+| 4 | 2 | Synthetic status records, `extract_ticket` and `validate_ticket` |
+| 5 | 2 | Read-only `check_status` with the ownership check, and `route` |
+| 6 | 2 | Five scenarios plus a Day 1 re-check, saves `day2_results.json` |
+| 7 | 3 | Versioned `build_prompt`, `guard_input` and `validate_response` |
+| 8 | 3 | `run_pipeline` — the guarded end-to-end flow |
+| 9 | 3 | Ten golden cases and `evaluate` with pass/fail reasons |
+| 10 | 3 | Saves the tested milestone, `day3_results.json` |
+| 11 | 4 | `run_app` — exact cache for the two public FAQs plus metrics |
+| 12 | 4 | Before/after cache experiment; checks version invalidation, TTL expiry, and that status requests bypass the cache and leave records unchanged |
+| 13 | 4 | Regression (10/10), illustrative cost; saves `day4_results.json`, `final_report.json`, `metrics.json`, `synthetic_data.json` |
+| 14 | 4 | Packs the JSON outputs into `murshid_submission.zip` |
+
+Running the notebook writes the same files to `murshid_outputs/` (ignored by Git) and packs them into `murshid_submission.zip`. Codes, counters and pass/fail results are deterministic, so a new run reproduces `results/core/`; only `trace_id` and `latency_ms` differ.
+
 ## Four-day development journey
 
 | Day | Built | Notebook cells | Result |
@@ -146,7 +204,7 @@ Trace IDs and latency change between runs; status codes, counters and pass/fail 
 
 Core project: no installation, API key, GPU or download needed — Python 3.9+ standard library only. Click **Open in Colab** above, choose a CPU runtime, and run all cells from the top. Outputs are written to `murshid_outputs/`.
 
-Real-model homework (Days 1 and 4) downloads `google/flan-t5-small` from Hugging Face on first run; allow a few minutes.
+Real-model homework (Days 1 and 4) needs `torch`, `transformers` and `sentencepiece` (preinstalled on Colab) and downloads `google/flan-t5-small` from Hugging Face on first run; allow a few minutes. Days 2 and 3 homework use the standard library only.
 
 ## Limitations
 
