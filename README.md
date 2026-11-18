@@ -112,7 +112,7 @@ Trace IDs and latency change between runs; status codes, counters and pass/fail 
 | Question | How can I check my application status? |
 | Generated answer | Use its reference number |
 | Input / output tokens | 34 / 6 |
-| Inference time | 0.294 s (CPU) |
+| Inference time | 0.501 s (CPU; varies between runs) |
 
 **Review:** the answer tells the user to use the reference number and invents no fees, dates or status.
 
@@ -130,7 +130,17 @@ Trace IDs and latency change between runs; status codes, counters and pass/fail 
 
 ### Day 4 — evaluate three real-model answers
 
-Open [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Shatha-1/murshid-llm-application-engineering/blob/main/homework/day4_evaluation.ipynb), run all cells on a CPU runtime, then save back to this repository (File → Save a copy in GitHub). The run generates answers to three paraphrased questions and records tokens, time and a `reference`+`number` keyword indicator — a weak proxy, not semantic accuracy, so each answer is also reviewed by hand.
+[`results/day4/evaluation_result.json`](results/day4/evaluation_result.json) — `google/flan-t5-small` on CPU, greedy decoding (`do_sample=False`, `num_beams=1`, `max_new_tokens=48`), same context for three paraphrased questions.
+
+| ID | Question | Answer | Keyword hit | Tokens in / out | Time |
+|---|---|---|:---:|---|---|
+| E01 | How can I check my application status? | Use its reference number | ✓ | 34 / 6 | 0.556 s |
+| E02 | What do I need to check my application status? | Reference number | ✓ | 36 / 4 | 3.198 s |
+| E03 | How can I find out the status of my application? | Use its reference number | ✓ | 37 / 6 | 2.156 s |
+
+**Keyword indicator: 3 / 3.** It only checks that `reference` and `number` both appear — a weak proxy, not semantic accuracy.
+
+**Manual review:** all three answers have the right meaning. E02 is shorter but correctly answers "what do I need". None invents fees, dates or an application status. Paraphrasing did not change the substance of the answer, but three cases on one context are far too few to claim robustness, and the timings vary with Colab load.
 
 ## How to run
 
