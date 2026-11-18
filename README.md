@@ -4,6 +4,18 @@ A small, fictional service assistant built step by step over four days in the **
 
 > **Mode: `mock`.** `FakeClient` is a finite, deterministic simulator — **not a live language model**. The core project demonstrates the engineering around an LLM-shaped interface (validation, tools, authorization, guards, testing, caching, measurement). All data is synthetic.
 
+## Key results
+
+| Metric | Result |
+|---|---|
+| Golden behavioral tests (Day 3, re-run after caching on Day 4) | **10 / 10 passed (100%)** |
+| Cache hit rate — same public FAQ sent 3 times | **66.7%** — 2 of 3 requests served from cache (miss, hit, hit) |
+| Mock model calls for those 3 requests | **3 → 1** (without cache → with cache) |
+| Day 2 homework — tool-call cases | 7 / 7 passed, records unchanged |
+| Day 3 homework — expected errors | 3 / 3 caught, corrected input accepted |
+| Day 4 homework — real-model keyword indicator | 3 / 3 (manual review: all three answers correct) |
+| External API calls | 0 |
+
 ## Notebooks
 
 | Notebook | What it is | Open |
@@ -153,7 +165,7 @@ Blank input is rejected before the client is called, so it adds no mock call. Re
 | Check | Result |
 |---|---|
 | Mock calls for 3 identical FAQs — without / with cache | 3 / 1 |
-| Cache hit sequence | miss, hit, hit (66.7%) |
+| Cache hit sequence | miss, hit, hit — 2 of 3 = 66.7% |
 | Regression after caching | 10 / 10 still pass |
 | Actual external API calls | 0 |
 
